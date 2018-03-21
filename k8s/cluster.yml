@@ -1,0 +1,54 @@
+--- # adds kubernetes repo and installs/enables kubelet
+- hosts: kube-all
+  become: yes
+  tasks:
+  - name: Install Docker
+    yum: name=docker state=latest
+
+  - name: Start and Enable Docker
+    service:
+      name: docker
+      enabled: yes
+      state: started
+
+  - name: Add Kubernetes repository
+    yum_repository:
+      name: Kubernetes
+      description: k8s repo
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      gpgcheck: yes
+
+  - name: Disable SELinux
+    selinux: state=disabled
+
+  - name: Configure sysctl for ipv6
+    sysctl:
+      name: net.bridge.bridge-nf-call-ip6tables
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+
+  - name: Configure sysctl for ipv4
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+
+  - name: Install kubelet
+    yum: name=kubelet state=latest
+
+  - name: Install kubeadm
+    yum: name=kubeadm state=latest
+
+  - name: Install kubectl
+    yum: name=kubectl state=latest
+
+  - name: Start and enable kubelet
+    service:
+      name: kubelet
+      enabled: yes
+      state: started
