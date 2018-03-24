@@ -2,6 +2,25 @@
 - hosts: kube-all
   become: yes
   tasks:
+  - name: Disable SELinux
+    selinux: state=disabled
+
+  - name: Configure sysctl for ipv6
+    sysctl:
+      name: net.bridge.bridge-nf-call-ip6tables
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+
+  - name: Configure sysctl for ipv4
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+
   - name: Install Docker
     yum: name=docker state=latest
 
@@ -21,22 +40,6 @@
 
   - name: Disable SELinux
     selinux: state=disabled
-
-  - name: Configure sysctl for ipv6
-    sysctl:
-      name: net.bridge.bridge-nf-call-ip6tables
-      value: 1
-      sysctl_set: yes
-      state: present
-      reload: yes
-
-  - name: Configure sysctl for ipv4
-    sysctl:
-      name: net.bridge.bridge-nf-call-iptables
-      value: 1
-      sysctl_set: yes
-      state: present
-      reload: yes
 
   - name: Install kubelet
     yum: name=kubelet state=latest
