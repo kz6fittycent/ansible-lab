@@ -5,6 +5,17 @@
   - name: Disable SELinux
     selinux: state=disabled
 
+  - name: comment out swap in fstab
+    replace:
+      path: /root/fstab
+      regexp: '^(?!#)(.*swap.*)'
+      replace: '#\1'
+    register: fstab
+
+  - name: turn off active swap
+    command: /sbin/swapoff -a
+    when: fstab.changed
+
   - name: Configure sysctl for ipv4
     sysctl:
       name: net.bridge.bridge-nf-call-iptables
